@@ -29,7 +29,7 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `phone` varchar(20) NOT NULL,
-  `role` enum('banhang','quanly','thukho') NOT NULL,
+  `role` enum('banhang','quanly','thukho','giamdoc') NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `username_unique` (`username`)
