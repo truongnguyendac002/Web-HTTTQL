@@ -4,36 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            overflow: hidden;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .welcome-message {
+            color: #f2f2f2;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+        }
+        .phone-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .phone-card {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px;
+            width: calc(20% - 22px); /* Adjust width for 5 items per row */
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, Manager!</h1>
-    <p>This is the manager's dashboard.</p>
-    
-    <!-- Nút điều hướng đến trang quản lý nhân viên -->
-    <button onclick="redirectToEmployeeManagement()">Employee Management</button>
+    <div class="navbar">
+        <div class="welcome-message">
+            Welcome, Manager!
+        </div>
+        <div>
+            <a href="{{ url_for('quanly') }}">Trang chủ</a>
+            <a href="{{ url_for('employee_management') }}">Quản lý nhân viên</a>
+            <a href="{{ url_for('customer_management') }}">Quản lý khách hàng</a>
+            <a href="{{ url_for('finance_management') }}">Quản lý tài chính</a>
+            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+        </div>
+    </div>
 
-    <!-- Nút điều hướng đến trang quản lý khách hàng -->
-    <button onclick="redirectToCustomerManagement()">Customer Management</button>
-
-    <!-- Nút điều hướng đến trang quản lý tài chính -->
-    <button onclick="redirectToFinanceManagement()">Finance Management</button>
-    <a href="{{ url_for('logout') }}">Logout</a>
-    <script>
-        // Hàm điều hướng đến trang quản lý nhân viên
-        function redirectToEmployeeManagement() {
-            window.location.href = "{{ url_for('employee_management') }}";
-        }
-
-        // Hàm điều hướng đến trang quản lý khách hàng
-        function redirectToCustomerManagement() {
-            window.location.href = "{{ url_for('customer_management') }}";
-        }
-
-        // Hàm điều hướng đến trang quản lý tài chính
-        function redirectToFinanceManagement() {
-            window.location.href = "{{ url_for('finance_management') }}";
-        }
-    </script>
-
+    <div class="content">
+        <div class="phone-grid">
+            {% for phone in dien_thoai_list %}
+                <div class="phone-card">
+                    <h2>{{ phone.tenDienThoai }}</h2>
+                    <p>{{ phone.moTa }}</p>
+                    <p>Giá: {{ "{:,.0f}".format(phone.giaTien) }} VND</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

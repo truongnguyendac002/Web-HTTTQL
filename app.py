@@ -7,10 +7,16 @@ import pyodbc
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'key'
-app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
+
+# app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
+# app.config['MSSQL_DATABASE'] = 'HTTTQL'
+# app.config['MSSQL_USER'] = 'sa'
+# app.config['MSSQL_PASSWORD'] = 'sa'
+
+app.config['MSSQL_SERVER'] = 'localhost'
 app.config['MSSQL_DATABASE'] = 'HTTTQL'
 app.config['MSSQL_USER'] = 'sa'
-app.config['MSSQL_PASSWORD'] = 'sa'
+app.config['MSSQL_PASSWORD'] = 'nhom2'
 
 # Setup MSSQL connection
 def get_db_connection():
@@ -81,12 +87,17 @@ def nvbanhang():
 @app.route("/quanly")
 @login_required
 def quanly():
-    return render_template('quanly.html')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tenDienThoai, moTa, giaTien FROM DienThoai")
+    dien_thoai_list = cursor.fetchall()
+    conn.close()
+    return render_template('quanly.html',dien_thoai_list=dien_thoai_list)
 
 @app.route("/nvthukho")
 @login_required
 def nvthukho():
-    return render_template('nvthukho.html')
+    return redirect(url_for('login'))
 
 @app.route("/")
 @login_required
