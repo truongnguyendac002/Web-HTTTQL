@@ -8,6 +8,32 @@
 <body>
     <h1>Welcome, Manager!</h1>
     <p>This is the manager's dashboard.</p>
+    
+    <!-- Nút điều hướng đến trang quản lý nhân viên -->
+    <button onclick="redirectToEmployeeManagement()">Employee Management</button>
+
+    <!-- Nút điều hướng đến trang quản lý khách hàng -->
+    <button onclick="redirectToCustomerManagement()">Customer Management</button>
+
+    <!-- Nút điều hướng đến trang quản lý tài chính -->
+    <button onclick="redirectToFinanceManagement()">Finance Management</button>
     <a href="{{ url_for('logout') }}">Logout</a>
+    <script>
+        // Hàm điều hướng đến trang quản lý nhân viên
+        function redirectToEmployeeManagement() {
+            window.location.href = "{{ url_for('employee_management') }}";
+        }
+
+        // Hàm điều hướng đến trang quản lý khách hàng
+        function redirectToCustomerManagement() {
+            window.location.href = "{{ url_for('customer_management') }}";
+        }
+
+        // Hàm điều hướng đến trang quản lý tài chính
+        function redirectToFinanceManagement() {
+            window.location.href = "{{ url_for('finance_management') }}";
+        }
+    </script>
+
 </body>
 </html>
