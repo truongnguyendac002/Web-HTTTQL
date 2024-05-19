@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+</head>
+<body>
+    <h1>Customer Management</h1>
+    <p>Enter Customer Phone Number:</p>
+    <input type="text" id="customer-phone">
+    <button onclick="getPurchaseHistory()">Get Purchase History</button>
+
+    <div id="purchase-history">
+        <!-- Nội dung lịch sử mua hàng của khách hàng sẽ được hiển thị ở đây -->
+    </div>
+
+    <!-- Thêm khách hàng -->
+    <p>Add Customer:</p>
+    <input type="text" id="new-customer-name" placeholder="Customer Name">
+    <input type="text" id="new-customer-address" placeholder="Customer Address">
+    <input type="text" id="new-customer-phone" placeholder="Customer Phone">
+    <button onclick="add_customer()">Add Customer</button>
+
+    <!-- Sửa khách hàng -->
+    <p>Edit Customer:</p>
+    <input type="text" id="edit-customer-phone" placeholder="Customer Phone">
+    <input type="text" id="edit-customer-new-name" placeholder="New Name">
+    <input type="text" id="edit-customer-new-address" placeholder="New Address">
+    <button onclick="edit_customer()">Edit Customer</button>
+
+    <!-- Xoá khách hàng -->
+    <p>Delete Customer:</p>
+    <input type="text" id="delete-customer-phone" placeholder="Customer Phone">
+    <button onclick="delete_customer()">Delete Customer</button>
+
+
+    <script>
+        async function getPurchaseHistory() {
+            const customerPhone = document.getElementById('customer-phone').value;
+            const response = await fetch('/get_purchase_history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ customer_phone: customerPhone }),
+            });
+            const data = await response.json();
+            const purchaseHistoryDiv = document.getElementById('purchase-history');
+            purchaseHistoryDiv.innerHTML = ''; // Xóa nội dung cũ trước khi hiển thị mới
+            if (data.success) {
+                const purchaseHistory = data.purchase_history;
+                if (purchaseHistory.length > 0) {
+                    const ul = document.createElement('ul');
+                    purchaseHistory.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = `${item.maHoaDon} - Total Amount: ${item.tongTien} Đ`;
+                        ul.appendChild(li);
+                    });
+                    purchaseHistoryDiv.appendChild(ul);
+                } else {
+                    purchaseHistoryDiv.textContent = 'No purchase history found for this customer.';
+                }
+            } else {
+                purchaseHistoryDiv.textContent = 'Failed to retrieve purchase history. Please try again later.';
+            }
+        }
+    </script>
+    <!-- Cập nhật hàm edit_customer() -->
+<script>
+    async function edit_customer() {
+        const customerPhone = document.getElementById('edit-customer-phone').value;
+        const newCustomerName = document.getElementById('edit-customer-new-name').value;
+        const newCustomerAddress = document.getElementById('edit-customer-new-address').value;
+
+        const response = await fetch('/edit_customer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                phone: customerPhone,
+                new_name: newCustomerName,
+                new_address: newCustomerAddress
+            }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Customer information updated successfully.');
+        } else {
+            alert('Failed to update customer information. Please try again later.');
+        }
+    }
+</script>
+<script>
+    async function add_customer() {
+        const newCustomerName = document.getElementById('new-customer-name').value;
+        const newCustomerAddress = document.getElementById('new-customer-address').value;
+        const newCustomerPhone = document.getElementById('new-customer-phone').value;
+
+        const response = await fetch('/add_customer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                new_name: newCustomerName,
+                new_address: newCustomerAddress,
+                new_phone: newCustomerPhone
+            }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Customer added successfully.');
+        } else {
+            alert('Failed to add customer. Please try again later.');
+        }
+    }
+</script>
+
+<!-- Cập nhật hàm delete_customer() -->
+<script>
+    async function delete_customer() {
+        const customerPhone = document.getElementById('delete-customer-phone').value;
+        const response = await fetch('/delete_customer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone: customerPhone }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Customer deleted successfully.');
+        } else {
+            alert('Failed to delete customer. Please try again later.');
+        }
+    }
+</script>
+
+</body>
+</html>

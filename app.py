@@ -100,7 +100,6 @@ def logout():
 
 # Trang nv ban hang
 
-
 added_products = []
 
 @app.route('/')
@@ -124,7 +123,6 @@ def add_product():
         return jsonify({"success": False, "message": "Product not found"}), 404
 
 
-from uuid import uuid4
 
 @app.route('/process_payment', methods=['POST'])
 def process_payment():
@@ -159,6 +157,121 @@ def process_payment():
             return jsonify({"success": False, "message": "Customer not found"}), 404
     else:
         return jsonify({"success": False, "message": "No products to process"}), 400
+
+
+@app.route('/employee_management')
+def employee_management():
+    # Xử lý logic cho trang quản lý nhân viên ở đây
+    return render_template('QuanLy/QLNhanVien.html')
+
+
+# Quan ly khach hang
+############################################
+@app.route('/add_customer', methods=['POST'])
+def add_customer():
+    try:
+        # Lấy dữ liệu khách hàng từ yêu cầu POST
+        customer_data = request.json
+        name = customer_data['name']
+        address = customer_data['address']
+        phone = customer_data['phone']
+        
+        # Tạo ID mới cho khách hàng
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(RIGHT(maKhachHang, 4)) FROM KhachHang")
+        last_id = cursor.fetchone()[0]
+        next_id = 1 if last_id is None else int(last_id) + 1
+        new_customer_id = f'KH{next_id:04d}'
+        
+        # Thêm khách hàng vào cơ sở dữ liệu
+        cursor.execute("INSERT INTO KhachHang (maKhachHang, hoTen, diaChi, sdt) VALUES (?, ?, ?, ?)", (new_customer_id, name, address, phone))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True, "message": "Customer added successfully"}), 200
+
+    except Exception as e:
+
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/edit_customer', methods=['POST'])
+def edit_customer():
+    try:
+        # Lấy dữ liệu khách hàng từ yêu cầu POST
+        customer_data = request.json
+        phone = customer_data['phone']
+        new_name = customer_data['new_name']
+        new_address = customer_data['new_address']
+        
+        # Thực hiện sửa thông tin của khách hàng trong cơ sở dữ liệu
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE KhachHang SET hoTen = ?, diaChi = ? WHERE sdt = ?", (new_name, new_address, phone))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True, "message": "Customer updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/delete_customer', methods=['POST'])
+def delete_customer():
+    try:
+        # Lấy số điện thoại của khách hàng từ yêu cầu POST
+        customer_phone = request.json.get('phone')
+
+        # Thực hiện xoá khách hàng khỏi cơ sở dữ liệu
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM KhachHang WHERE sdt = ?", (customer_phone,))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True, "message": "Customer deleted successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/get_purchase_history', methods=['POST'])
+def get_purchase_history():
+    try:
+        # Lấy số điện thoại của khách hàng từ yêu cầu POST
+        customer_phone = request.json.get('customer_phone')
+
+        # Tạo truy vấn SQL để lấy lịch sử mua hàng của khách hàng
+        query = """
+        SELECT HoaDonBanHang.maHoaDon, HoaDonBanHang.tongTien 
+        FROM HoaDonBanHang 
+        JOIN KhachHang ON HoaDonBanHang.maKhachHang = KhachHang.maKhachHang 
+        WHERE KhachHang.sdt = ?
+        """
+
+        # Thực thi truy vấn và lấy kết quả
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, customer_phone)
+        purchase_history = cursor.fetchall()
+
+        # Chuyển kết quả sang định dạng phù hợp để trả về cho client
+        formatted_purchase_history = [{'maHoaDon': row[0], 'tongTien': row[1]} for row in purchase_history]
+
+        # Trả về lịch sử mua hàng dưới dạng JSON
+        return jsonify({"success": True, "purchase_history": formatted_purchase_history}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+@app.route('/customer_management')
+def customer_management():
+    # Xử lý logic cho trang quản lý khách hàng ở đây
+    return render_template('QuanLy/QLKhachHang.html')
+
+@app.route('/finance_management')
+def finance_management():
+    # Xử lý logic cho trang quản lý tài chính ở đây
+    return render_template('QuanLy/QLTaiChinh.html')
 
 
 
