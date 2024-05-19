@@ -89,7 +89,7 @@ def nvbanhang():
 def quanly():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT tenDienThoai, moTa, giaTien FROM DienThoai")
+    cursor.execute("SELECT tenDienThoai, moTa, giaTien, img FROM DienThoai")
     dien_thoai_list = cursor.fetchall()
     conn.close()
     return render_template('quanly.html',dien_thoai_list=dien_thoai_list)
@@ -99,10 +99,10 @@ def quanly():
 def nvthukho():
     return redirect(url_for('login'))
 
-@app.route("/")
-@login_required
-def home():
-    return f'Hello, {current_user.role}!'
+# @app.route("/")
+# @login_required
+# def home():
+#     return f'Hello, {current_user.role}!'
 
 @app.route("/logout")
 def logout():
@@ -115,7 +115,9 @@ added_products = []
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('login'))
+
+
 
 @app.route('/add_product', methods=['POST'])
 def add_product():
