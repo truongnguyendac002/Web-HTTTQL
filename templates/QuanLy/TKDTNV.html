@@ -1,0 +1,93 @@
+{% extends 'QuanLy/QLNhanVien.html' %}
+
+{% block main_content %}
+    <style>
+        .table-container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .doanhthu-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .doanhthu-table th, .doanhthu-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .doanhthu-table th {
+            background-color: #ffb300;
+            color: white;
+        }
+        .chart-container {
+            margin-top: 30px;
+        }
+    </style>
+
+    <h1>Thống kê doanh thu theo nhân viên</h1>
+    <div class="table-container">
+        <table class="doanhthu-table">
+            <thead>
+                <tr>
+                    <th>Họ tên nhân viên</th>
+                    <th>Doanh thu (VND)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in doanhthu_data %}
+                    <tr>
+                        <td>{{ row.hoTen }}</td>
+                        <td>{{ "{:,.0f}".format(row.doanhThu) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="doanhThuChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('doanhThuChart').getContext('2d');
+            const data = {
+                labels: [
+                    {% for row in doanhthu_data %}
+                        "{{ row.hoTen }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Doanh thu (VND)',
+                    data: [
+                        {% for row in doanhthu_data %}
+                            {{ row.doanhThu }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(255, 179, 0, 0.6)',
+                    borderColor: 'rgba(255, 179, 0, 1)',
+                    borderWidth: 1
+                }]
+            };
+            const options = {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            };
+            const doanhThuChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: options
+            });
+        });
+    </script>
+{% endblock %}

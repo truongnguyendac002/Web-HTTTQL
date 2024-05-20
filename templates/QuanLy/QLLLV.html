@@ -1,0 +1,125 @@
+{% extends 'QuanLy/QLNhanVien.html' %}
+
+{% block main_content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #ffb300;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+        .navbar a:hover {
+            background-color: #ffcc00;
+            color: white;
+        }
+        .welcome-message {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+        }
+        .form-container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-container label {
+            margin: 10px 0 5px;
+            font-size: 16px;
+        }
+        .form-container select, .form-container input, .form-container button {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-container button {
+            background-color: #ffb300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .form-container button:hover {
+            background-color: #ffcc00;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .schedule-table th {
+            background-color: #ffb300;
+            color: white;
+        }
+    </style>
+    
+    <h1>Quản lý lịch làm việc</h1>
+    <div class="form-container">
+        <form method="post">
+            <label for="maNhanVien">Mã nhân viên:</label>
+            <select name="maNhanVien">
+                {% for employee in employees %}
+                    <option value="{{ employee.maNhanVien }}">{{ employee.hoTen }}</option>
+                {% endfor %}
+            </select>
+            <label for="ngay">Ngày:</label>
+            <input type="date" name="ngay">
+            <label for="ca">Ca làm việc:</label>
+            <select name="ca">
+                <option value="sáng">Sáng</option>
+                <option value="chiều">Chiều</option>
+            </select>
+            <button type="submit">Thêm</button>
+        </form>
+    </div>
+
+    <h2>Lịch làm việc tuần này</h2>
+    <table class="schedule-table">
+        <thead>
+            <tr>
+                <th>Ngày</th>
+                <th>Sáng</th>
+                <th>Chiều</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day, shifts in weekly_schedule.items() %}
+                <tr>
+                    <td>{{ day }}</td>
+                    <td>{{ shifts['sáng'] | join(', ') }}</td>
+                    <td>{{ shifts['chiều'] | join(', ') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

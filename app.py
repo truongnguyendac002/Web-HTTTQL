@@ -4,6 +4,8 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import pyodbc
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'key'
@@ -92,7 +94,63 @@ def quanly():
     cursor.execute("SELECT tenDienThoai, moTa, giaTien, img FROM DienThoai")
     dien_thoai_list = cursor.fetchall()
     conn.close()
-    return render_template('quanly.html',dien_thoai_list=dien_thoai_list)
+    return render_template('trangchu.html',dien_thoai_list=dien_thoai_list)
+
+@app.route("/lichlamviec", methods=['GET', 'POST'])
+def lichlamviec():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if request.method == 'POST':
+        maNhanVien = request.form['maNhanVien']
+        ngay = request.form['ngay']
+        ca = request.form['ca']
+        cursor.execute(
+            "INSERT INTO LichLamViec (maNhanVien, ngay, ca) VALUES (?, ?, ?)",
+            (maNhanVien, ngay, ca)
+        )
+        conn.commit()
+
+    cursor.execute("SELECT maNhanVien, hoTen FROM NhanVien WHERE maChiNhanh = 'CN001'")
+    employees = cursor.fetchall()
+
+    # Get the current week's schedule
+    start_of_week = datetime.now() - timedelta(days=datetime.now().weekday())
+    weekly_schedule = {}
+    for i in range(7):
+        current_day = start_of_week + timedelta(days=i)
+        formatted_date = current_day.strftime('%Y-%m-%d')
+        weekly_schedule[current_day.strftime('%A')] = {'sáng': [], 'chiều': []}
+        cursor.execute("SELECT nv.hoTen, llv.ca FROM LichLamViec llv JOIN NhanVien nv ON llv.maNhanVien = nv.maNhanVien WHERE llv.ngay = ?", (formatted_date,))
+        shifts = cursor.fetchall()
+        for shift in shifts:
+            weekly_schedule[current_day.strftime('%A')][shift[1]].append(shift[0])
+
+    conn.close()
+    return render_template('QuanLy/QLLLV.html', employees=employees, weekly_schedule=weekly_schedule)
+
+@app.route("/tkdoanhthunv")
+def tkdoanhthunv():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Truy vấn lấy thông tin doanh thu theo nhân viên
+    cursor.execute("""
+        SELECT nv.hoTen, SUM(hdbh.tongTien) AS doanhThu
+        FROM HoaDonBanHang hdbh
+        JOIN NhanVien nv ON hdbh.maNhanVien = nv.maNhanVien
+        WHERE nv.maChiNhanh = 'CN001'
+        GROUP BY nv.hoTen
+        ORDER BY doanhThu DESC
+    """)
+    doanhthu_data = cursor.fetchall()
+    
+    conn.close()
+    return render_template('QuanLy/TKDTNV.html', doanhthu_data=doanhthu_data)
+
+@app.route("/quanlyluong")
+def quanlyluong():
+    return render_template('QuanLy/QLLuong.html')
 
 @app.route("/nvthukho")
 @login_required

@@ -1,0 +1,10 @@
+{% extends 'QuanLy/QLNhanVien.html' %}
+
+{% block main_content %}
+    <h1>Quản lý lương</h1>
+    <ul>
+        {% for employee in employees %}
+            <li>{{ employee.hoTen }} - {{ "{:,.0f}".format(employee.luong) }} VND</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

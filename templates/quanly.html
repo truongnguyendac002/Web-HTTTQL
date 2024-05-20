@@ -94,7 +94,7 @@
             Welcome, Manager!
         </div>
         <div>
-            <a href="{{ url_for('index') }}">Trang chủ</a>
+            <a href="{{ url_for('quanly') }}">Trang chủ</a>
             <a href="{{ url_for('employee_management') }}">Quản lý nhân viên</a>
             <a href="{{ url_for('customer_management') }}">Quản lý khách hàng</a>
             <a href="{{ url_for('finance_management') }}">Quản lý tài chính</a>
@@ -103,16 +103,8 @@
     </div>
 
     <div class="content">
-        <div class="phone-grid">
-            {% for phone in dien_thoai_list %}
-                <div class="phone-card">
-                    <img src="{{ url_for('static', filename = 'img/' + phone.img) }}" alt="{{ phone.tenDienThoai }}">
-                    <h2>{{ phone.tenDienThoai }}</h2>
-                    <p>{{ phone.moTa }}</p>
-                    <p class="price">Giá: {{ "{:,.0f}".format(phone.giaTien) }} VND</p>
-                </div>
-            {% endfor %}
-        </div>
+        {% block content %}
+        {% endblock %}
     </div>
 </body>
 </html>

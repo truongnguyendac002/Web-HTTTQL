@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #ffb300;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+        .navbar a:hover {
+            background-color: #ffcc00;
+            color: white;
+        }
+        .welcome-message {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .content {
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: auto;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            padding: 10px;
+        }
+        .sidebar ul li a:hover {
+            background-color: #575757;
+            border-radius: 4px;
+        }
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+        .phone-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .phone-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            width: calc(20% - 20px); /* 5 items per row with spacing */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .phone-card img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        .phone-card h2 {
+            font-size: 18px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .phone-card p {
+            font-size: 14px;
+            color: #777;
+        }
+        .phone-card .price {
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .phone-card .buy-button {
+            background-color: #ffb300;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .phone-card .buy-button:hover {
+            background-color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="welcome-message">
+            Welcome, Manager!
+        </div>
+        <div>
+            <a href="{{ url_for('quanly') }}">Trang chủ</a>
+            <a href="{{ url_for('employee_management') }}">Quản lý nhân viên</a>
+            <a href="{{ url_for('customer_management') }}">Quản lý khách hàng</a>
+            <a href="{{ url_for('finance_management') }}">Quản lý tài chính</a>
+            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('lichlamviec') }}">Quản lý lịch làm việc</a></li>
+                <li><a href="{{ url_for('tkdoanhthunv') }}">Thống kê doanh thu</a></li>
+                <li><a href="{{ url_for('quanlyluong') }}">Quản lý lương</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            {% block main_content %}
+            <h1>Chọn một tùy chọn từ menu bên trái</h1>
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>
