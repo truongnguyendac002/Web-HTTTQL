@@ -191,6 +191,54 @@ def quanlyluong():
     conn.close()
     return render_template('QuanLy/QLLuong.html', luong_data=luong_data)
 
+@app.route('/delete_luong/<maNhanVien>', methods=['DELETE'])
+def delete_luong(maNhanVien):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM BangLuong WHERE maNhanVien = ?", maNhanVien)
+    conn.commit()
+    conn.close()
+    return jsonify(success=True)
+
+@app.route('/update_luong', methods=['POST'])
+def update_luong():
+    data = request.get_json()
+    maNhanVien = data['maNhanVien']
+    hoTen = data['hoTen']
+    luong = data['luong']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE NhanVien SET hoTen = ?, luong = ? WHERE maNhanVien = ?", (hoTen, luong, maNhanVien))
+    conn.commit()
+    conn.close()
+    return jsonify(success=True)
+
+@app.route('/delete_shift', methods=['POST'])
+def delete_shift():
+    data = request.get_json()
+    day = data['day']
+    shift = data['shift']
+    employee = data['employee']
+    
+    # Chuyển đổi ngày từ chuỗi sang datetime.date
+    day_date = datetime.strptime(day, '%Y-%m-%d').date()
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        DELETE FROM lich_lam_viec 
+        WHERE maNhanVien = (
+            SELECT maNhanVien FROM NhanVien WHERE hoTen = ?
+        ) AND ngay = ? AND ca = ?
+    """, (employee, day_date, shift))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify(success=True)
+
 
 @app.route("/nvthukho")
 @login_required

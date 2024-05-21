@@ -28,6 +28,41 @@
             background-color: #ffb300;
             color: white;
         }
+
+        .salary-table td button {
+            background-color: #ffb300;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px 1px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .salary-table td button.edit-button {
+            background-color: #4CAF50;
+        }
+
+        .salary-table td button.save-button {
+            background-color: #008CBA;
+        }
+
+        .salary-table td button.delete-button {
+            background-color: #f44336;
+        }
+
+        .editable {
+            background-color: #ffffe0;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 
     {% if luong_data %}
@@ -40,6 +75,9 @@
                         <th>Mã nhân viên</th>
                         <th>Tên nhân viên</th>
                         <th>Mức lương (VND)</th>
+                        <th>Chỉnh sửa</th>
+                        <th>Lưu</th>
+                        <th>Xóa</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,12 +85,82 @@
                         <tr>
                             <td>{{ row.stt }}</td>
                             <td>{{ row.maNhanVien }}</td>
-                            <td>{{ row.hoTen }}</td>
-                            <td>{{ "{:,.0f}".format(row.luong) }}</td>
+                            <td contenteditable="false">{{ row.hoTen }}</td>
+                            <td contenteditable="false">{{ "{:,.0f}".format(row.luong) }}</td>
+                            <td>
+                                <button class="edit-button" onclick="editRow(this)">Chỉnh sửa</button>
+                            </td>
+                            <td>
+                                <button class="save-button" onclick="saveRow(this)" disabled>Lưu</button>
+                            </td>
+                            <td>
+                                <button class="delete-button" onclick="deleteLuong('{{ row.maNhanVien }}')">Xóa</button>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     {% endif %}
+
+    <script>
+        function editRow(button) {
+            let row = button.closest('tr');
+            row.querySelectorAll('td[contenteditable="false"]').forEach(td => {
+                td.contentEditable = "true";
+                td.classList.add('editable');
+            });
+            row.querySelector('.save-button').disabled = false;
+            button.disabled = true;
+        }
+
+        function saveRow(button) {
+            let row = button.closest('tr');
+            let maNhanVien = row.cells[1].innerText.trim();
+            let hoTen = row.cells[2].innerText.trim();
+            let luong = parseFloat(row.cells[3].innerText.replace(/,/g, ''));
+
+            fetch('/update_luong', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    maNhanVien: maNhanVien,
+                    hoTen: hoTen,
+                    luong: luong
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cập nhật thành công');
+                    row.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+                        td.contentEditable = "false";
+                        td.classList.remove('editable');
+                    });
+                    row.querySelector('.edit-button').disabled = false;
+                    button.disabled = true;
+                } else {
+                    alert('Cập nhật không thành công');
+                }
+            });
+        }
+
+        function deleteLuong(maNhanVien) {
+            if (confirm('Bạn có chắc chắn muốn xóa nhân viên này không?')) {
+                fetch('/delete_luong/' + maNhanVien, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Xóa không thành công.');
+                    }
+                });
+            }
+        }
+    </script>
 {% endblock %}

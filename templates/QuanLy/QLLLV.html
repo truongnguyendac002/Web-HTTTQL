@@ -81,6 +81,11 @@
             background-color: #ffb300;
             color: white;
         }
+        .schedule-table .delete-button {
+            color: red;
+            cursor: pointer;
+            margin-left: 10px;
+        }
     </style>
     
     <h1>Quản lý lịch làm việc</h1>
@@ -116,10 +121,41 @@
             {% for day, shifts in weekly_schedule.items() %}
                 <tr>
                     <td>{{ day }}</td>
-                    <td>{{ shifts['sáng'] | join(', ') }}</td>
-                    <td>{{ shifts['chiều'] | join(', ') }}</td>
+                    <td>
+                        {% for employee in shifts['sáng'] %}
+                            {{ employee }} <span class="delete-button" onclick="deleteShift('{{ day }}', 'sáng', '{{ employee }}')">x</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for employee in shifts['chiều'] %}
+                            {{ employee }} <span class="delete-button" onclick="deleteShift('{{ day }}', 'chiều', '{{ employee }}')">x</span>
+                        {% endfor %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        function deleteShift(day, shift, employee) {
+            if (confirm(`Bạn có chắc chắn muốn xóa ca làm việc của ${employee} vào ngày ${day} ca ${shift}?`)) {
+                const day_date = new Date(day).toISOString().split('T')[0];
+                fetch('/delete_shift', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ day: day_date, shift: shift, employee: employee })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Xóa ca làm việc không thành công.');
+                    }
+                });
+            }
+        }
+    </script>
 {% endblock %}
