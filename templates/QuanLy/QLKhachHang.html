@@ -1,244 +1,298 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Management</title>
+{% extends 'quanly.html' %}
+
+{% block content %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .navbar {
-            background-color: #ffb300;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 14px 20px;
-            font-size: 16px;
-        }
-        .navbar a:hover {
-            background-color: #ffcc00;
-            color: white;
-        }
-        .welcome-message {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .content {
-            display: flex;
-            margin-top: 60px; /* Để không bị che bởi navbar */
-            padding: 20px;
-        }
-        .main-content {
+        .table-container {
             background-color: white;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin: auto;
-            width: 80%;
-            max-width: 800px;
-        }
-        .main-content h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .main-content p {
-            font-size: 16px;
-            color: #555;
+            padding: 16px;
             margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .main-content input, .main-content button {
-            font-size: 16px;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            width: calc(100% - 22px); /* Để phù hợp với padding */
-        }
-        .main-content button {
-            background-color: #ffb300;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
-        .main-content button:hover {
-            background-color: #ffcc00;
-        }
-        #purchase-history {
+
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
         }
-        #purchase-history ul {
-            list-style: none;
-            padding: 0;
+
+        .customer-table th, .customer-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
         }
-        #purchase-history ul li {
-            background-color: #f9f9f9;
-            padding: 10px;
-            margin: 5px 0;
+
+        .customer-table th {
+            background-color: #ffb300;
+            color: white;
+        }
+
+        .pagination {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination a {
+            color: #333;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+            border: 1px solid #ddd;
+            margin: 0 4px;
+        }
+
+        .pagination a.active {
+            background-color: #ffb300;
+            color: white;
+            border: 1px solid #ffb300;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-container input[type="text"] {
+            padding: 8px;
+            width: 300px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 16px;
         }
+
+        .search-container button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            background-color: #ffb300;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .search-container button:hover {
+            background-color: #ffcc00;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #ffb300;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .action-buttons button:hover {
+            background-color: #ffcc00;
+        }
+
+        .edit-container input[type="text"] {
+            width: 90%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .save-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .save-button:hover {
+            background-color: #45a049;
+        }
+
     </style>
-</head>
-<body>
-    <div class="navbar">
-        <div class="welcome-message">
-            Welcome, Manager!
-        </div>
-        <div>
-            <a href="{{ url_for('quanly') }}">Trang chủ</a>
-            <a href="{{ url_for('employee_management') }}">Quản lý nhân viên</a>
-            <a href="{{ url_for('customer_management') }}">Quản lý khách hàng</a>
-            <a href="{{ url_for('finance_management') }}">Quản lý tài chính</a>
-            <a href="{{ url_for('logout') }}">Đăng xuất</a>
-        </div>
+
+    <h1>Quản lý khách hàng</h1>
+    
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Tìm kiếm...">
+        <button onclick="searchCustomer()">Tìm kiếm</button>
     </div>
 
-    <div class="content">
-        <div class="main-content">
-            <h1>Customer Management</h1>
-            <p>Enter Customer Phone Number:</p>
-            <input type="text" id="customer-phone">
-            <button onclick="getPurchaseHistory()">Get Purchase History</button>
-
-            <div id="purchase-history">
-                <!-- Nội dung lịch sử mua hàng của khách hàng sẽ được hiển thị ở đây -->
-            </div>
-
-            <!-- Thêm khách hàng -->
-            <p>Add Customer:</p>
-            <input type="text" id="new-customer-name" placeholder="Customer Name">
-            <input type="text" id="new-customer-address" placeholder="Customer Address">
-            <input type="text" id="new-customer-phone" placeholder="Customer Phone">
-            <button onclick="add_customer()">Add Customer</button>
-
-            <!-- Sửa khách hàng -->
-            <p>Edit Customer:</p>
-            <input type="text" id="edit-customer-phone" placeholder="Customer Phone">
-            <input type="text" id="edit-customer-new-name" placeholder="New Name">
-            <input type="text" id="edit-customer-new-address" placeholder="New Address">
-            <button onclick="edit_customer()">Edit Customer</button>
-
-            <!-- Xoá khách hàng -->
-            <p>Delete Customer:</p>
-            <input type="text" id="delete-customer-phone" placeholder="Customer Phone">
-            <button onclick="delete_customer()">Delete Customer</button>
-        </div>
+    <div class="table-container">
+        <table class="customer-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã khách hàng</th>
+                    <th>Tên khách hàng</th>
+                    <th>Địa chỉ</th>
+                    <th>Số điện thoại</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                    <tr data-ma-khach-hang="{{ customer.maKhachHang }}">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ customer.maKhachHang }}</td>
+                        <td>
+                            <span class="view-mode">{{ customer.hoTen }}</span>
+                            <input class="edit-mode" type="text" name="hoTen" value="{{ customer.hoTen }}" style="display: none;">
+                        </td>
+                        <td>
+                            <span class="view-mode">{{ customer.diaChi }}</span>
+                            <input class="edit-mode" type="text" name="diaChi" value="{{ customer.diaChi }}" style="display: none;">
+                        </td>
+                        <td>
+                            <span class="view-mode">{{ customer.sdt }}</span>
+                            <input class="edit-mode" type="text" name="sdt" value="{{ customer.sdt }}" style="display: none;">
+                        </td>
+                        <td class="action-buttons">
+                            <button class="edit-button">Sửa</button>
+                            <button class="save-button" style="display: none;">Lưu</button>
+                            <button class="delete-button" onclick="deleteCustomer('{{ customer.maKhachHang }}')">Xóa</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
+    <div class="pagination">
+        {% if current_page > 1 %}
+            <a href="{{ url_for('customer_management', page=current_page-1, search=request.args.get('search', '')) }}">&laquo;</a>
+        {% endif %}
+        
+        {% if current_page > 2 %}
+            <a href="{{ url_for('customer_management', page=1, search=request.args.get('search', '')) }}">1</a>
+            {% if current_page > 3 %}
+                <span>...</span>
+            {% endif %}
+        {% endif %}
+        
+        {% if current_page > 1 %}
+            <a href="{{ url_for('customer_management', page=current_page-1, search=request.args.get('search', '')) }}">{{ current_page-1 }}</a>
+        {% endif %}
+        
+        <a href="{{ url_for('customer_management', page=current_page, search=request.args.get('search', '')) }}" class="active">{{ current_page }}</a>
+        
+        {% if current_page < total_pages %}
+            <a href="{{ url_for('customer_management', page=current_page+1, search=request.args.get('search', '')) }}">{{ current_page+1 }}</a>
+        {% endif %}
+        
+        {% if current_page < total_pages - 1 %}
+            {% if current_page < total_pages - 2 %}
+                <span>...</span>
+            {% endif %}
+            <a href="{{ url_for('customer_management', page=total_pages, search=request.args.get('search', '')) }}">{{ total_pages }}</a>
+        {% endif %}
+        
+        {% if current_page < total_pages %}
+            <a href="{{ url_for('customer_management', page=current_page+1, search=request.args.get('search', '')) }}">&raquo;</a>
+        {% endif %}
+    </div>
+    
     <script>
-        async function getPurchaseHistory() {
-            const customerPhone = document.getElementById('customer-phone').value;
-            const response = await fetch('/get_purchase_history', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ customer_phone: customerPhone }),
+        document.querySelectorAll('.edit-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+                row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'inline-block');
+                row.querySelector('.edit-button').style.display = 'none';
+                row.querySelector('.save-button').style.display = 'inline-block';
             });
-            const data = await response.json();
-            const purchaseHistoryDiv = document.getElementById('purchase-history');
-            purchaseHistoryDiv.innerHTML = ''; // Xóa nội dung cũ trước khi hiển thị mới
-            if (data.success) {
-                const purchaseHistory = data.purchase_history;
-                if (purchaseHistory.length > 0) {
-                    const ul = document.createElement('ul');
-                    purchaseHistory.forEach(item => {
-                        const li = document.createElement('li');
-                        li.textContent = `${item.maHoaDon} - Total Amount: ${item.tongTien} Đ`;
-                        ul.appendChild(li);
+        });
+
+        document.querySelectorAll('.save-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const maKhachHang = row.cells[1].innerText.trim();
+                const hoTen = row.cells[2].innerText.trim();
+                const diaChi = row.cells[3].innerText.trim();
+                const sdt = row.cells[4].innerText.trim();
+
+                fetch('/update_customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        maKhachHang: maKhachHang,
+                        hoTen: hoTen,
+                        diaChi: diaChi,
+                        sdt: sdt,
+                    })
+                }).then(response => {
+                    return response.json().then(data => {
+                        if (response.ok) {
+                            return data;
+                        } else {
+                            return Promise.reject(data);
+                        }
                     });
-                    purchaseHistoryDiv.appendChild(ul);
-                } else {
-                    purchaseHistoryDiv.textContent = 'No purchase history found for this customer.';
-                }
-            } else {
-                purchaseHistoryDiv.textContent = 'Failed to retrieve purchase history. Please try again later.';
-            }
-        }
-    </script>
-    <!-- Cập nhật hàm edit_customer() -->
-    <script>
-        async function edit_customer() {
-            const customerPhone = document.getElementById('edit-customer-phone').value;
-            const newCustomerName = document.getElementById('edit-customer-new-name').value;
-            const newCustomerAddress = document.getElementById('edit-customer-new-address').value;
+                }).then(data => {
+                    if (data.success) {
 
-            const response = await fetch('/edit_customer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    phone: customerPhone,
-                    new_name: newCustomerName,
-                    new_address: newCustomerAddress
-                }),
+                        row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'inline-block');
+                        row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+                        row.querySelector('.edit-button').style.display = 'inline-block';
+                        row.querySelector('.save-button').style.display = 'none';
+
+                        row.querySelector('.view-mode:nth-child(1)').textContent = hoTen;
+                        row.querySelector('.view-mode:nth-child(2)').textContent = diaChi;
+                        row.querySelector('.view-mode:nth-child(3)').textContent = sdt;
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật khách hàng: ' + data.error);
+                        row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'inline-block');
+                        row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+                        row.querySelector('.edit-button').style.display = 'inline-block';
+                        row.querySelector('.save-button').style.display = 'none';
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật khách hàng.');
+                });
             });
-            const data = await response.json();
-            if (data.success) {
-                alert('Customer information updated successfully.');
-            } else {
-                alert('Failed to update customer information. Please try again later.');
+        });
+
+        function deleteCustomer(maKhachHang) {
+            if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
+                fetch('/delete_customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ maKhachHang: maKhachHang })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        document.querySelector(`tr[data-ma-khach-hang="${maKhachHang}"]`).remove();
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa khách hàng.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa khách hàng.');
+                });
             }
         }
-    </script>
-    <script>
-        async function add_customer() {
-            const newCustomerName = document.getElementById('new-customer-name').value;
-            const newCustomerAddress = document.getElementById('new-customer-address').value;
-            const newCustomerPhone = document.getElementById('new-customer-phone').value;
 
-            const response = await fetch('/add_customer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    new_name: newCustomerName,
-                    new_address: newCustomerAddress,
-                    new_phone: newCustomerPhone
-                }),
-            });
-            const data = await response.json();
-            if (data.success) {
-                alert('Customer added successfully.');
-            } else {
-                alert('Failed to add customer. Please try again later.');
-            }
+        function searchCustomer() {
+            const searchValue = document.getElementById('search-input').value;
+            window.location.href = "{{ url_for('customer_management') }}" + "?search=" + searchValue;
         }
     </script>
-
-    <!-- Cập nhật hàm delete_customer() -->
-    <script>
-        async function delete_customer() {
-            const customerPhone = document.getElementById('delete-customer-phone').value;
-            const response = await fetch('/delete_customer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ phone: customerPhone }),
-            });
-            const data = await response.json();
-            if (data.success) {
-                alert('Customer deleted successfully.');
-            } else {
-                alert('Failed to delete customer. Please try again later.');
-            }
-        }
-    </script>
-
-</body>
-</html>
+{% endblock %}

@@ -10,15 +10,15 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'key'
 
-app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
-app.config['MSSQL_DATABASE'] = 'HTTTQL'
-app.config['MSSQL_USER'] = 'sa'
-app.config['MSSQL_PASSWORD'] = 'sa'
-
-# app.config['MSSQL_SERVER'] = 'localhost'
+# app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
 # app.config['MSSQL_DATABASE'] = 'HTTTQL'
 # app.config['MSSQL_USER'] = 'sa'
-# app.config['MSSQL_PASSWORD'] = 'nhom2'
+# app.config['MSSQL_PASSWORD'] = 'sa'
+
+app.config['MSSQL_SERVER'] = 'localhost'
+app.config['MSSQL_DATABASE'] = 'HTTTQL'
+app.config['MSSQL_USER'] = 'sa'
+app.config['MSSQL_PASSWORD'] = 'nhom2'
 
 # Setup MSSQL connection
 def get_db_connection():
@@ -354,46 +354,6 @@ def add_customer():
 
         return jsonify({"success": False, "message": str(e)}), 500
 
-
-@app.route('/edit_customer', methods=['POST'])
-def edit_customer():
-    try:
-        # Lấy dữ liệu khách hàng từ yêu cầu POST
-        customer_data = request.json
-        phone = customer_data['phone']
-        new_name = customer_data['new_name']
-        new_address = customer_data['new_address']
-        
-        # Thực hiện sửa thông tin của khách hàng trong cơ sở dữ liệu
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("UPDATE KhachHang SET hoTen = ?, diaChi = ? WHERE sdt = ?", (new_name, new_address, phone))
-        conn.commit()
-        conn.close()
-
-        return jsonify({"success": True, "message": "Customer updated successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-@app.route('/delete_customer', methods=['POST'])
-def delete_customer():
-    try:
-        # Lấy số điện thoại của khách hàng từ yêu cầu POST
-        customer_phone = request.json.get('phone')
-
-        # Thực hiện xoá khách hàng khỏi cơ sở dữ liệu
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM KhachHang WHERE sdt = ?", (customer_phone,))
-        conn.commit()
-        conn.close()
-
-        return jsonify({"success": True, "message": "Customer deleted successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
 @app.route('/get_purchase_history', methods=['POST'])
 def get_purchase_history():
     try:
@@ -422,10 +382,79 @@ def get_purchase_history():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-@app.route('/customer_management')
+    
+    
+@app.route('/customer_management', methods=['GET'])
 def customer_management():
-    # Xử lý logic cho trang quản lý khách hàng ở đây
-    return render_template('QuanLy/QLKhachHang.html')
+    search = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    
+    if search:
+        search_query = f"""
+        SELECT * FROM KhachHang
+        WHERE maKhachHang LIKE ? OR hoTen LIKE ? OR sdt LIKE ?
+        """
+        search_param = f"%{search}%"
+        cursor.execute(search_query, (search_param, search_param, search_param))
+    else:
+        cursor.execute("SELECT * FROM KhachHang")
+    
+    customers = cursor.fetchall()
+    total_customers = len(customers)
+    
+    # Pagination logic
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_customers = customers[start:end]
+    total_pages = (total_customers + per_page - 1) // per_page
+    
+    return render_template(
+        'QuanLy/QLKhachHang.html',
+        customers=paginated_customers,
+        current_page=page,
+        total_pages=total_pages,
+        search=search
+    )
+
+@app.route('/update_customer', methods=['POST'])
+def update_customer():
+    data = request.json
+    maKhachHang = data['maKhachHang']
+    hoTen = data['hoTen']
+    diaChi = data['diaChi']
+    sdt = data['sdt']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+    UPDATE KhachHang
+    SET hoTen = ?, diaChi = ?, sdt = ?
+    WHERE maKhachHang = ?
+    """
+    cursor.execute(query, (hoTen, diaChi, sdt, maKhachHang))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/delete_customer', methods=['POST'])
+def delete_customer():
+    data = request.json
+    maKhachHang = data['maKhachHang']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = "DELETE FROM KhachHang WHERE maKhachHang = ?"
+    cursor.execute(query, (maKhachHang,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
 
 @app.route('/finance_management')
 def finance_management():
