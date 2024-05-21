@@ -10,15 +10,15 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'key'
 
-# app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
-# app.config['MSSQL_DATABASE'] = 'HTTTQL'
-# app.config['MSSQL_USER'] = 'sa'
-# app.config['MSSQL_PASSWORD'] = 'sa'
-
-app.config['MSSQL_SERVER'] = 'localhost'
+app.config['MSSQL_SERVER'] = 'DESKTOP-P61169L\HIHI'
 app.config['MSSQL_DATABASE'] = 'HTTTQL'
 app.config['MSSQL_USER'] = 'sa'
-app.config['MSSQL_PASSWORD'] = 'nhom2'
+app.config['MSSQL_PASSWORD'] = 'sa'
+
+# app.config['MSSQL_SERVER'] = 'localhost'
+# app.config['MSSQL_DATABASE'] = 'HTTTQL'
+# app.config['MSSQL_USER'] = 'sa'
+# app.config['MSSQL_PASSWORD'] = 'nhom2'
 
 # Setup MSSQL connection
 def get_db_connection():
