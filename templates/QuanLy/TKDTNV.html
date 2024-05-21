@@ -24,6 +24,13 @@
             background-color: #ffb300;
             color: white;
         }
+        .doanhthu-table td a {
+            color: #333;
+            text-decoration: none;
+        }
+        .doanhthu-table td a:hover {
+            text-decoration: underline;
+        }
         .chart-container {
             margin-top: 30px;
         }
@@ -41,7 +48,7 @@
             <tbody>
                 {% for row in doanhthu_data %}
                     <tr>
-                        <td>{{ row.hoTen }}</td>
+                        <td><a href="{{ url_for('doanhthu_chitiet', maNhanVien=row.maNhanVien) }}">{{ row.hoTen }}</a></td>
                         <td>{{ "{:,.0f}".format(row.doanhThu) }}</td>
                     </tr>
                 {% endfor %}

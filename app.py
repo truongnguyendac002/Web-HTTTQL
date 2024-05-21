@@ -134,23 +134,63 @@ def tkdoanhthunv():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Truy vấn lấy thông tin doanh thu theo nhân viên
     cursor.execute("""
-        SELECT nv.hoTen, SUM(hdbh.tongTien) AS doanhThu
+        SELECT nv.maNhanVien, nv.hoTen, SUM(hdbh.tongTien) AS doanhThu
         FROM HoaDonBanHang hdbh
         JOIN NhanVien nv ON hdbh.maNhanVien = nv.maNhanVien
         WHERE nv.maChiNhanh = 'CN001'
-        GROUP BY nv.hoTen
+        GROUP BY nv.maNhanVien, nv.hoTen
         ORDER BY doanhThu DESC
     """)
-    doanhthu_data = cursor.fetchall()
+    rows = cursor.fetchall()
+    
+    # Loại bỏ khoảng trắng thừa trong maNhanVien
+    doanhthu_data = [
+        {'maNhanVien': row.maNhanVien.strip(), 'hoTen': row.hoTen.strip(), 'doanhThu': row.doanhThu}
+        for row in rows
+    ]
     
     conn.close()
     return render_template('QuanLy/TKDTNV.html', doanhthu_data=doanhthu_data)
 
+
+@app.route("/tkdoanhthunv/<maNhanVien>")
+def doanhthu_chitiet(maNhanVien):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT maHoaDon, maKhachHang, ngayThanhToan, tongTien
+        FROM HoaDonBanHang
+        WHERE maNhanVien = ?
+        ORDER BY ngayThanhToan DESC
+    """, (maNhanVien.strip(),))
+    hoadon_data = cursor.fetchall()
+
+    cursor.execute("SELECT hoTen FROM NhanVien WHERE maNhanVien = ?", (maNhanVien.strip(),))
+    nhanvien = cursor.fetchone()
+    
+    conn.close()
+    return render_template('QuanLy/ChiTietDoanhThuNV.html', hoadon_data=hoadon_data, nhanvien=nhanvien)
+
+
+
 @app.route("/quanlyluong")
 def quanlyluong():
-    return render_template('QuanLy/QLLuong.html')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Truy vấn để lấy danh sách nhân viên và mức lương của họ
+    cursor.execute("""
+        SELECT ROW_NUMBER() OVER (ORDER BY maNhanVien) AS stt, maNhanVien, hoTen, luong
+        FROM NhanVien
+        WHERE maChiNhanh = 'CN001'
+    """)
+    luong_data = cursor.fetchall()
+    
+    conn.close()
+    return render_template('QuanLy/QLLuong.html', luong_data=luong_data)
+
 
 @app.route("/nvthukho")
 @login_required

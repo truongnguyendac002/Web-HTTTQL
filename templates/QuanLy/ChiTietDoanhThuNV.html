@@ -1,0 +1,52 @@
+{% extends 'QuanLy/QLNhanVien.html' %}
+
+{% block main_content %}
+    <style>
+        .table-container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .doanhthu-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .doanhthu-table th, .doanhthu-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .doanhthu-table th {
+            background-color: #ffb300;
+            color: white;
+        }
+    </style>
+
+    <h1>Chi tiết doanh thu của {{ nhanvien.hoTen }}</h1>
+    <div class="table-container">
+        <table class="doanhthu-table">
+            <thead>
+                <tr>
+                    <th>Mã hóa đơn</th>
+                    <th>Mã khách hàng</th>
+                    <th>Ngày thanh toán</th>
+                    <th>Tổng tiền (VND)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in hoadon_data %}
+                    <tr>
+                        <td>{{ row.maHoaDon }}</td>
+                        <td>{{ row.maKhachHang }}</td>
+                        <td>{{ row.ngayThanhToan }}</td>
+                        <td>{{ "{:,.0f}".format(row.tongTien) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

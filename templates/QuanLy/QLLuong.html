@@ -1,10 +1,58 @@
 {% extends 'QuanLy/QLNhanVien.html' %}
 
 {% block main_content %}
-    <h1>Quản lý lương</h1>
-    <ul>
-        {% for employee in employees %}
-            <li>{{ employee.hoTen }} - {{ "{:,.0f}".format(employee.luong) }} VND</li>
-        {% endfor %}
-    </ul>
+    <style>
+        /* Kiểu cho bảng lương */
+        .table-container {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .salary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .salary-table th, .salary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .salary-table th {
+            background-color: #ffb300;
+            color: white;
+        }
+    </style>
+
+    {% if luong_data %}
+        <h1>Quản lý lương nhân viên</h1>
+        <div class="table-container">
+            <table class="salary-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã nhân viên</th>
+                        <th>Tên nhân viên</th>
+                        <th>Mức lương (VND)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in luong_data %}
+                        <tr>
+                            <td>{{ row.stt }}</td>
+                            <td>{{ row.maNhanVien }}</td>
+                            <td>{{ row.hoTen }}</td>
+                            <td>{{ "{:,.0f}".format(row.luong) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}
