@@ -4,36 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #ffb300;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+        .navbar a:hover {
+            background-color: #ffcc00;
+            color: white;
+        }
+        .welcome-message {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .content {
+            display: flex;
+            margin-top: 60px; /* Để không bị che bởi navbar */
+            padding: 20px;
+        }
+        .main-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: auto;
+            width: 80%;
+            max-width: 800px;
+        }
+        .main-content h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .main-content p {
+            font-size: 16px;
+            color: #555;
+            margin: 10px 0;
+        }
+        .main-content input, .main-content button {
+            font-size: 16px;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: calc(100% - 22px); /* Để phù hợp với padding */
+        }
+        .main-content button {
+            background-color: #ffb300;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        .main-content button:hover {
+            background-color: #ffcc00;
+        }
+        #purchase-history {
+            margin-top: 20px;
+        }
+        #purchase-history ul {
+            list-style: none;
+            padding: 0;
+        }
+        #purchase-history ul li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Customer Management</h1>
-    <p>Enter Customer Phone Number:</p>
-    <input type="text" id="customer-phone">
-    <button onclick="getPurchaseHistory()">Get Purchase History</button>
-
-    <div id="purchase-history">
-        <!-- Nội dung lịch sử mua hàng của khách hàng sẽ được hiển thị ở đây -->
+    <div class="navbar">
+        <div class="welcome-message">
+            Welcome, Manager!
+        </div>
+        <div>
+            <a href="{{ url_for('quanly') }}">Trang chủ</a>
+            <a href="{{ url_for('employee_management') }}">Quản lý nhân viên</a>
+            <a href="{{ url_for('customer_management') }}">Quản lý khách hàng</a>
+            <a href="{{ url_for('finance_management') }}">Quản lý tài chính</a>
+            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+        </div>
     </div>
 
-    <!-- Thêm khách hàng -->
-    <p>Add Customer:</p>
-    <input type="text" id="new-customer-name" placeholder="Customer Name">
-    <input type="text" id="new-customer-address" placeholder="Customer Address">
-    <input type="text" id="new-customer-phone" placeholder="Customer Phone">
-    <button onclick="add_customer()">Add Customer</button>
+    <div class="content">
+        <div class="main-content">
+            <h1>Customer Management</h1>
+            <p>Enter Customer Phone Number:</p>
+            <input type="text" id="customer-phone">
+            <button onclick="getPurchaseHistory()">Get Purchase History</button>
 
-    <!-- Sửa khách hàng -->
-    <p>Edit Customer:</p>
-    <input type="text" id="edit-customer-phone" placeholder="Customer Phone">
-    <input type="text" id="edit-customer-new-name" placeholder="New Name">
-    <input type="text" id="edit-customer-new-address" placeholder="New Address">
-    <button onclick="edit_customer()">Edit Customer</button>
+            <div id="purchase-history">
+                <!-- Nội dung lịch sử mua hàng của khách hàng sẽ được hiển thị ở đây -->
+            </div>
 
-    <!-- Xoá khách hàng -->
-    <p>Delete Customer:</p>
-    <input type="text" id="delete-customer-phone" placeholder="Customer Phone">
-    <button onclick="delete_customer()">Delete Customer</button>
+            <!-- Thêm khách hàng -->
+            <p>Add Customer:</p>
+            <input type="text" id="new-customer-name" placeholder="Customer Name">
+            <input type="text" id="new-customer-address" placeholder="Customer Address">
+            <input type="text" id="new-customer-phone" placeholder="Customer Phone">
+            <button onclick="add_customer()">Add Customer</button>
 
+            <!-- Sửa khách hàng -->
+            <p>Edit Customer:</p>
+            <input type="text" id="edit-customer-phone" placeholder="Customer Phone">
+            <input type="text" id="edit-customer-new-name" placeholder="New Name">
+            <input type="text" id="edit-customer-new-address" placeholder="New Address">
+            <button onclick="edit_customer()">Edit Customer</button>
+
+            <!-- Xoá khách hàng -->
+            <p>Delete Customer:</p>
+            <input type="text" id="delete-customer-phone" placeholder="Customer Phone">
+            <button onclick="delete_customer()">Delete Customer</button>
+        </div>
+    </div>
 
     <script>
         async function getPurchaseHistory() {
@@ -67,76 +169,76 @@
         }
     </script>
     <!-- Cập nhật hàm edit_customer() -->
-<script>
-    async function edit_customer() {
-        const customerPhone = document.getElementById('edit-customer-phone').value;
-        const newCustomerName = document.getElementById('edit-customer-new-name').value;
-        const newCustomerAddress = document.getElementById('edit-customer-new-address').value;
+    <script>
+        async function edit_customer() {
+            const customerPhone = document.getElementById('edit-customer-phone').value;
+            const newCustomerName = document.getElementById('edit-customer-new-name').value;
+            const newCustomerAddress = document.getElementById('edit-customer-new-address').value;
 
-        const response = await fetch('/edit_customer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                phone: customerPhone,
-                new_name: newCustomerName,
-                new_address: newCustomerAddress
-            }),
-        });
-        const data = await response.json();
-        if (data.success) {
-            alert('Customer information updated successfully.');
-        } else {
-            alert('Failed to update customer information. Please try again later.');
+            const response = await fetch('/edit_customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone: customerPhone,
+                    new_name: newCustomerName,
+                    new_address: newCustomerAddress
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Customer information updated successfully.');
+            } else {
+                alert('Failed to update customer information. Please try again later.');
+            }
         }
-    }
-</script>
-<script>
-    async function add_customer() {
-        const newCustomerName = document.getElementById('new-customer-name').value;
-        const newCustomerAddress = document.getElementById('new-customer-address').value;
-        const newCustomerPhone = document.getElementById('new-customer-phone').value;
+    </script>
+    <script>
+        async function add_customer() {
+            const newCustomerName = document.getElementById('new-customer-name').value;
+            const newCustomerAddress = document.getElementById('new-customer-address').value;
+            const newCustomerPhone = document.getElementById('new-customer-phone').value;
 
-        const response = await fetch('/add_customer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                new_name: newCustomerName,
-                new_address: newCustomerAddress,
-                new_phone: newCustomerPhone
-            }),
-        });
-        const data = await response.json();
-        if (data.success) {
-            alert('Customer added successfully.');
-        } else {
-            alert('Failed to add customer. Please try again later.');
+            const response = await fetch('/add_customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    new_name: newCustomerName,
+                    new_address: newCustomerAddress,
+                    new_phone: newCustomerPhone
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Customer added successfully.');
+            } else {
+                alert('Failed to add customer. Please try again later.');
+            }
         }
-    }
-</script>
+    </script>
 
-<!-- Cập nhật hàm delete_customer() -->
-<script>
-    async function delete_customer() {
-        const customerPhone = document.getElementById('delete-customer-phone').value;
-        const response = await fetch('/delete_customer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ phone: customerPhone }),
-        });
-        const data = await response.json();
-        if (data.success) {
-            alert('Customer deleted successfully.');
-        } else {
-            alert('Failed to delete customer. Please try again later.');
+    <!-- Cập nhật hàm delete_customer() -->
+    <script>
+        async function delete_customer() {
+            const customerPhone = document.getElementById('delete-customer-phone').value;
+            const response = await fetch('/delete_customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone: customerPhone }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Customer deleted successfully.');
+            } else {
+                alert('Failed to delete customer. Please try again later.');
+            }
         }
-    }
-</script>
+    </script>
 
 </body>
 </html>
