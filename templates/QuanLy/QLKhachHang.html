@@ -220,10 +220,10 @@
         document.querySelectorAll('.save-button').forEach(button => {
             button.addEventListener('click', function() {
                 const row = this.closest('tr');
-                const maKhachHang = row.cells[1].innerText.trim();
-                const hoTen = row.cells[2].innerText.trim();
-                const diaChi = row.cells[3].innerText.trim();
-                const sdt = row.cells[4].innerText.trim();
+                const maKhachHang = row.getAttribute('data-ma-khach-hang');
+                const hoTen = row.querySelector('input[name="hoTen"]').value.trim();
+                const diaChi = row.querySelector('input[name="diaChi"]').value.trim();
+                const sdt = row.querySelector('input[name="sdt"]').value.trim();
 
                 fetch('/update_customer', {
                     method: 'POST',
@@ -257,10 +257,6 @@
                         row.querySelector('.view-mode:nth-child(3)').textContent = sdt;
                     } else {
                         alert('Có lỗi xảy ra khi cập nhật khách hàng: ' + data.error);
-                        row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'inline-block');
-                        row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
-                        row.querySelector('.edit-button').style.display = 'inline-block';
-                        row.querySelector('.save-button').style.display = 'none';
                     }
                 }).catch(error => {
                     console.error('Error:', error);

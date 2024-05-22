@@ -3,11 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Staff Dashboard</title>
+    <title>Nhân viên kho</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #ffb300;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+        .navbar a:hover {
+            background-color: #ffcc00;
+            color: white;
+        }
+        .content {
+            padding: 20px;
+        }
+        .phone-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .phone-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            width: calc(20% - 20px); /* 5 items per row with spacing */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .phone-card img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        .phone-card h2 {
+            font-size: 18px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .phone-card p {
+            font-size: 14px;
+            color: #777;
+        }
+        .phone-card .price {
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .phone-card .buy-button {
+            background-color: #ffb300;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .phone-card .buy-button:hover {
+            background-color: #ffcc00;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, Warehouse Staff!</h1>
-    <p>This is the warehouse staff's dashboard.</p>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <div class="navbar">
+        <div></div>
+        <div>
+            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Danh sách điện thoại trong kho</h1>
+        <div class="phone-grid">
+            {% for phone in dien_thoai_list %}
+                <div class="phone-card">
+                    <img src="{{ url_for('static', filename='img/' + phone.img) }}" alt="{{ phone.tenDienThoai }}">
+                    <h2>{{ phone.tenDienThoai }}</h2>
+                    <p>{{ phone.moTa }}</p>
+                    <p class="price">Giá: {{ "{:,.0f}".format(phone.giaTien) }} VND</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

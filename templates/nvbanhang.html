@@ -2,96 +2,207 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta viewport="width=device-width, initial-scale=1.0">
-    <title>Sales Representative Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhân viên bán hàng</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
+            padding: 0;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
             padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
             color: #333;
         }
 
-        h1, h2 {
-            color: #0056b3;
-        }
-
-        div {
+        .form-group {
             margin-bottom: 20px;
         }
 
-        input[type="text"], button {
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
             padding: 10px;
-            margin-top: 5px;
-            border: 2px solid #ddd;
+            border: 1px solid #ddd;
             border-radius: 4px;
-        }
-
-        input[type="text"] {
-            width: calc(100% - 24px);
-        }
-
-        button {
-            background-color: #0056b3;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
-
-        button:hover {
-            background-color: #004494;
-        }
-
-        .payment-button {
-            padding: 10px 20px;
             font-size: 16px;
+            transition: border-color 0.3s;
         }
 
-        a {
-            color: #0056b3;
-            text-decoration: none;
-            font-weight: bold;
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ffb300;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .form-group input[readonly] {
+            background-color: #f9f9f9;
         }
 
-        .total-amount {
-            font-weight: bold;
-            color: #d35400;
+        .form-group button {
+            padding: 15px 20px;
+            background-color: #ffb300;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #ffcc00;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome, Sales Representative!</h1>
-    <a href="{{ url_for('logout') }}">Logout</a>
-
-    <div>
-        <label for="product-code">Enter Product Code:</label>
-        <input type="text" id="product-code">
-        <button onclick="addProduct()">Add Product</button>
+    <div class="form-container">
+        <h2>Tạo hóa đơn</h2>
+        <div class="form-group">
+            <label for="maHoaDon">Mã hóa đơn</label>
+            <input type="text" id="maHoaDon" name="maHoaDon">
+        </div>
+        <div class="form-group">
+            <label for="maKhachHang">Mã khách hàng</label>
+            <input type="text" id="maKhachHang" name="maKhachHang">
+        </div>
+        <div class="form-group">
+            <label for="maNhanVien">Mã nhân viên</label>
+            <input type="text" id="maNhanVien" name="maNhanVien" onchange="fetchChiNhanh()">
+        </div>
+        <div class="form-group">
+            <label for="maDienThoai">Chọn điện thoại</label>
+            <select id="maDienThoai" name="maDienThoai" onchange="calculateTotal()">
+                <!-- Các tùy chọn sẽ được nạp từ server -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="soLuong">Số lượng</label>
+            <input type="number" id="soLuong" name="soLuong" onchange="calculateTotal()">
+        </div>
+        <div class="form-group">
+            <label for="tongTien">Tổng tiền</label>
+            <input type="text" id="tongTien" name="tongTien" readonly>
+        </div>
+        <div class="form-group">
+            <label for="ngayThanhToan">Ngày thanh toán</label>
+            <input type="date" id="ngayThanhToan" name="ngayThanhToan">
+        </div>
+        <div class="form-group">
+            <label for="maChiNhanh">Mã chi nhánh</label>
+            <input type="text" id="maChiNhanh" name="maChiNhanh" readonly>
+        </div>
+        <div class="form-group">
+            <button onclick="submitInvoice()">Xuất hóa đơn</button>
+        </div>
     </div>
-
-    <div class="product-list" id="product-list">
-        <h2>Product List</h2>
-    </div>
-
-    <div class="customer-phone">
-        <label for="customer-phone">Enter Customer Phone:</label>
-        <input type="text" id="customer-phone">    
-    </div>
-
-    <div>
-        <span class="total-amount" id="total-amount-info">Total amount to be paid: <span id="total-amount"></span> Đ</span>
-    </div>
-
-    <button class="payment-button" onclick="processPayment()">Proceed to Payment</button>
-
-    <div></div>
+    
     <script>
-        // JavaScript remains unchanged
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/get_next_ma_hoa_don')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('maHoaDon').value = data.next_ma_hoa_don;
+                });
+
+            // Fetch điện thoại options từ server
+            fetch('/get_dien_thoai_options')
+                .then(response => response.json())
+                .then(data => {
+                    const maDienThoaiSelect = document.getElementById('maDienThoai');
+                    data.forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.maDienThoai;
+                        opt.textContent = `${option.tenDienThoai} - ${option.giaTien} VND`;
+                        opt.setAttribute('data-giatien', option.giaTien);
+                        maDienThoaiSelect.appendChild(opt);
+                    });
+                });
+        });
+
+        function calculateTotal() {
+            const maDienThoaiSelect = document.getElementById('maDienThoai');
+            const soLuongInput = document.getElementById('soLuong');
+            const tongTienInput = document.getElementById('tongTien');
+
+            const selectedOption = maDienThoaiSelect.options[maDienThoaiSelect.selectedIndex];
+            const giaTien = selectedOption.getAttribute('data-giatien');
+            const soLuong = soLuongInput.value;
+
+            if (giaTien && soLuong) {
+                const tongTien = giaTien * soLuong;
+                tongTienInput.value = tongTien;
+            } else {
+                tongTienInput.value = '';
+            }
+        }
+
+        function fetchChiNhanh() {
+            const maNhanVien = document.getElementById('maNhanVien').value;
+            if (maNhanVien) {
+                fetch(`/get_chi_nhanh?maNhanVien=${maNhanVien}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('maChiNhanh').value = data.maChiNhanh || '';
+                    });
+            }
+        }
+
+        function submitInvoice() {
+            const maHoaDon = document.getElementById('maHoaDon').value;
+            const maKhachHang = document.getElementById('maKhachHang').value;
+            const maNhanVien = document.getElementById('maNhanVien').value;
+            const maDienThoai = document.getElementById('maDienThoai').value;
+            const soLuong = document.getElementById('soLuong').value;
+            const tongTien = document.getElementById('tongTien').value;
+            const ngayThanhToan = document.getElementById('ngayThanhToan').value;
+            const maChiNhanh = document.getElementById('maChiNhanh').value;
+
+            fetch('/submit_invoice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    maHoaDon,
+                    maKhachHang,
+                    maNhanVien,
+                    maDienThoai,
+                    soLuong,
+                    tongTien,
+                    ngayThanhToan,
+                    maChiNhanh
+                })
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    alert('Hóa đơn đã được lưu thành công!');
+                    window.location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.error);
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi lưu hóa đơn.');
+            });
+        }
     </script>
 </body>
 </html>

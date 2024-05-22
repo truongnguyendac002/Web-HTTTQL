@@ -86,6 +86,63 @@ def login():
 def nvbanhang():
     return render_template('nvbanhang.html')
 
+@app.route('/get_dien_thoai_options')
+def get_dien_thoai_options():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT maDienThoai, tenDienThoai, giaTien FROM DienThoai")
+    dien_thoai_options = [{'maDienThoai': row[0], 'tenDienThoai': row[1], 'giaTien': row[2]} for row in cursor.fetchall()]
+    return jsonify(dien_thoai_options)
+
+@app.route('/get_chi_nhanh')
+def get_chi_nhanh():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    maNhanVien = request.args.get('maNhanVien')
+    cursor.execute("SELECT maChiNhanh FROM NhanVien WHERE maNhanVien = ?", maNhanVien)
+    row = cursor.fetchone()
+    return jsonify({'maChiNhanh': row[0] if row else None})
+
+@app.route('/submit_invoice', methods=['POST'])
+def submit_invoice():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    data = request.json
+    maHoaDon = data.get('maHoaDon')
+    maKhachHang = data.get('maKhachHang')
+    maNhanVien = data.get('maNhanVien')
+    maDienThoai = data.get('maDienThoai')
+    soLuong = data.get('soLuong')
+    tongTien = data.get('tongTien')
+    ngayThanhToan = data.get('ngayThanhToan')
+    maChiNhanh = data.get('maChiNhanh')
+
+    try:
+        cursor.execute("""
+            INSERT INTO HoaDon (maHoaDon, maKhachHang, maNhanVien, maDienThoai, soLuong, tongTien, ngayThanhToan, maChiNhanh)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, maHoaDon, maKhachHang, maNhanVien, maDienThoai, soLuong, tongTien, ngayThanhToan, maChiNhanh)
+        conn.commit()
+        return jsonify(success=True)
+    except pyodbc.Error as e:
+        print("Error:", e)
+        return jsonify(success=False, error=str(e))
+    
+@app.route('/get_next_ma_hoa_don')
+def get_next_ma_hoa_don():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT TOP 1 maHoaDon FROM HoaDonBanHang ORDER BY maHoaDon DESC")
+    last_ma_hoa_don = cursor.fetchone()
+    if last_ma_hoa_don:
+        last_ma_hoa_don = last_ma_hoa_don[0]
+        prefix = last_ma_hoa_don[:3]
+        number = int(last_ma_hoa_don[3:]) + 1
+        next_ma_hoa_don = f"{prefix}{number:06d}"
+    else:
+        next_ma_hoa_don = "HDB000001"
+    return jsonify({'next_ma_hoa_don': next_ma_hoa_don})
+
 @app.route("/quanly")
 @login_required
 def quanly():
@@ -243,12 +300,21 @@ def delete_shift():
 @app.route("/nvthukho")
 @login_required
 def nvthukho():
-    return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT tenDienThoai, moTa, giaTien, img FROM DienThoai")
+    dien_thoai_list = cursor.fetchall()
+    conn.close()
+    return render_template('nvthukho.html',dien_thoai_list=dien_thoai_list)
 
-# @app.route("/")
-# @login_required
-# def home():
-#     return f'Hello, {current_user.role}!'
+@app.route('/get_dien_thoai_in_stock')
+def get_dien_thoai_in_stock():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT TOP 10 maDienThoai, tenDienThoai, moTa, giaTien, img FROM DienThoai")
+    dien_thoai_list = [{'maDienThoai': row[0], 'tenDienThoai': row[1], 'moTa': row[2], 'giaTien': row[3], 'img': row[4]} for row in cursor.fetchall()]
+    return jsonify(dien_thoai_list)
+
 
 @app.route("/logout")
 def logout():
@@ -430,16 +496,17 @@ def update_customer():
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    query = """
-    UPDATE KhachHang
-    SET hoTen = ?, diaChi = ?, sdt = ?
-    WHERE maKhachHang = ?
-    """
-    cursor.execute(query, (hoTen, diaChi, sdt, maKhachHang))
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'success': True})
+    try:
+        cursor.execute("""
+            UPDATE KhachHang
+            SET hoTen = ?, diaChi = ?, sdt = ?
+            WHERE maKhachHang = ?
+        """, hoTen, diaChi, sdt, maKhachHang)
+        conn.commit()
+        return jsonify(success=True)
+    except pyodbc.Error as e:
+        print("Error:", e)
+        return jsonify(success=False, error=str(e))
 
 @app.route('/delete_customer', methods=['POST'])
 def delete_customer():
@@ -453,7 +520,8 @@ def delete_customer():
     conn.commit()
     conn.close()
     
-    return jsonify({'success': True})
+    return jsonify(success=True)
+
 
 
 @app.route('/finance_management')
